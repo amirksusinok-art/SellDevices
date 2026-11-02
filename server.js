@@ -78,7 +78,7 @@ function tick(s){if(now()>=s.nextBatchAt){s.batch={id:id(),count:rand(5,20),pric
 function moneyAbs(n){return `${Math.abs(n).toLocaleString('ru-RU')} ₽`;}
 app.get('/health',(_,res)=>res.json({ok:true}));
 app.use('/api',(req,res,next)=>{const tg=telegramIdentity(req.headers['x-telegram-init-data']);req.identity=tg||guest(req,res);next();});
-app.get('/api/state',async(req,res)=>{try{const x=await run(req.identity.key,req.identity.name,s=>{tick(s);return null});res.json({state:x.state,mode:req.identity.key.startsWith('tg:')?'telegram':'demo'});}catch(e){res.status(500).json({error:e.message});}});
+app.get('/api/state',async(req,res)=>{try{const x=await run(req.identity.key,req.identity.name,s=>{tick(s);return null});res.json({state:x.state,mode:req.identity.key.startsWith('tg:')?'telegram':'demo',persistent:!!pool});}catch(e){res.status(500).json({error:e.message});}});
 app.post('/api/action',async(req,res)=>{try{const x=await run(req.identity.key,req.identity.name,s=>{tick(s);return action(s,req.body.type,req.body)});res.json({state:x.state,message:x.result});}catch(e){res.status(400).json({error:e.message});}});
 app.get('/{*path}',(_,res)=>res.sendFile(path.join(path.dirname(fileURLToPath(import.meta.url)),'public','index.html')));
 const port=Number(process.env.PORT)||3000;
